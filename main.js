@@ -9,3 +9,63 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='
 }).addTo(map)
 
 var data = L.geoJson(parksData).addTo(map);
+
+function getColor(d) {
+    return d > 9 ? '#004c6d' :
+        d > 7 ? '#346888' :
+        d > 5 ? '#5886a5' :
+        d > 3 ? '#7aa6c2' :
+        d > 1 ? '#9dc6e0' :
+                '#c1e7ff'
+                
+}
+
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.PicnicTables),
+        color: getColor(feature.properties.PicnicTables),
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.7
+    }
+}
+
+L.geoJson(parksData, {style: style}).addTo(map)
+
+// mouse events
+var geojson
+
+function highlightFeature(e) {
+    var layer = e.target
+
+    layer.setStyle({
+        weight: 2,
+        color: '#666',
+        fillOpacity: 0.7
+    })
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront()
+    }
+}
+
+function resetHighlight(e) {
+    geojson.resetStyle(e.target)
+}
+
+function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds())
+}
+
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+    })
+}
+
+geojson = L.geoJson(parksData, {
+    style: style,
+    onEachFeature: onEachFeature
+}).addTo(map)
