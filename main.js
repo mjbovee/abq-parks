@@ -11,12 +11,12 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='
 var data = L.geoJson(parksData).addTo(map);
 
 function getColor(d) {
-    return d > 9 ? '#004c6d' :
-        d > 7 ? '#346888' :
-        d > 5 ? '#5886a5' :
-        d > 3 ? '#7aa6c2' :
-        d > 1 ? '#9dc6e0' :
-                '#c1e7ff'
+    return d > 9 ? '#58508d' :
+        d > 7 ? '#6f669f' :
+        d > 5 ? '#877cb2' :
+        d > 3 ? '#9e93c5' :
+        d > 1 ? '#b6abd8' :
+                '#cec4eb'
                 
 }
 
@@ -47,10 +47,13 @@ function highlightFeature(e) {
     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
         layer.bringToFront()
     }
+
+    info.update(layer.feature.properties)
 }
 
 function resetHighlight(e) {
     geojson.resetStyle(e.target)
+    info.update()
 }
 
 function zoomToFeature(e) {
@@ -69,3 +72,24 @@ geojson = L.geoJson(parksData, {
     style: style,
     onEachFeature: onEachFeature
 }).addTo(map)
+
+var info = L.control()
+
+info.onAdd = function(map) {
+    this._div = L.DomUtil.create('div', 'info')
+    this.update()
+    return this._div
+}
+
+info.update = function(props) {
+    var name
+    if(props) {
+        name = props.Name.toLowerCase().split(' ').map(el => el.charAt(0).toUpperCase() + el.slice(1)).join(' ')
+        name.includes('Golf Course') || name.includes('Park') ? '' : name = name + ' Park'
+        this._div.innerHTML = '<strong>Park: </strong>' + name + '<br><strong>Picnic tables: </strong>' + props.PicnicTables
+    } else {
+        this._div.innerHTML = 'Hover over a park'
+    }
+}
+
+info.addTo(map)
